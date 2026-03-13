@@ -5,6 +5,7 @@ import '../providers/user_provider.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 import 'initial_balance_screen.dart';
+import 'pin_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,9 +43,15 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (userProvider.isOnboarded) {
       if (userProvider.isInitialBalanceSet) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        if (userProvider.isAppLockEnabled) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const PinScreen()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        }
       } else {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const InitialBalanceScreen()),

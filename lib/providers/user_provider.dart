@@ -12,6 +12,9 @@ class UserProvider with ChangeNotifier {
   bool _isInitialBalanceSet = false;
   bool _isSteganographyMode = false;
   bool _isDeveloperMode = false;
+  bool _isAppLockEnabled = false;
+  bool _isBiometricEnabled = false;
+  String _appPin = '';
 
   String get name => _name;
   int get age => _age;
@@ -22,6 +25,10 @@ class UserProvider with ChangeNotifier {
   bool get isInitialBalanceSet => _isInitialBalanceSet;
   bool get isSteganographyMode => _isSteganographyMode;
   bool get isDeveloperMode => _isDeveloperMode;
+  bool get isAppLockEnabled => _isAppLockEnabled;
+  bool get isBiometricEnabled => _isBiometricEnabled;
+  bool get hasPin => _appPin.isNotEmpty;
+  String get appPin => _appPin;
 
   UserProvider() {
     _loadFromPrefs();
@@ -37,6 +44,9 @@ class UserProvider with ChangeNotifier {
     _isInitialBalanceSet = prefs.getBool('is_initial_balance_set') ?? false;
     _isSteganographyMode = prefs.getBool('is_steganography_mode') ?? false;
     _isDeveloperMode = prefs.getBool('is_developer_mode') ?? false;
+    _isAppLockEnabled = prefs.getBool('is_app_lock_enabled') ?? false;
+    _isBiometricEnabled = prefs.getBool('is_biometric_enabled') ?? false;
+    _appPin = prefs.getString('app_pin') ?? '';
 
     final themeString = prefs.getString('theme_mode') ?? 'light';
     if (themeString == 'light') {
@@ -102,6 +112,27 @@ class UserProvider with ChangeNotifier {
     _isDeveloperMode = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('is_developer_mode', value);
+    notifyListeners();
+  }
+
+  Future<void> setAppLockEnabled(bool value) async {
+    _isAppLockEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_app_lock_enabled', value);
+    notifyListeners();
+  }
+
+  Future<void> setBiometricEnabled(bool value) async {
+    _isBiometricEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_biometric_enabled', value);
+    notifyListeners();
+  }
+
+  Future<void> setAppPin(String pin) async {
+    _appPin = pin;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('app_pin', pin);
     notifyListeners();
   }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import 'initial_balance_screen.dart';
+import 'pin_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -36,12 +37,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
           )
           .then((_) {
             if (mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const InitialBalanceScreen()),
-              );
+              _showSecurityPrompt();
             }
           });
     }
+  }
+
+  void _showSecurityPrompt() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Seguridad'),
+        content: const Text(
+          '¿Deseas configurar un PIN y huella digital para proteger tu información?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const InitialBalanceScreen()),
+              );
+            },
+            child: const Text('Más tarde'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const PinScreen(isSettingPin: true),
+                ),
+              );
+              if (mounted) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => const InitialBalanceScreen(),
+                  ),
+                );
+              }
+            },
+            child: const Text('Configurar'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildNeumorphicContainer({

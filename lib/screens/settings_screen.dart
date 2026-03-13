@@ -10,6 +10,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/neumorphic_container.dart';
 import '../services/log_stream_service.dart';
+import 'pin_screen.dart';
+import '../services/biometric_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -214,6 +216,89 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     activeThumbColor: primaryColor,
                   ),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          _buildSectionTitle('Seguridad', primaryColor),
+          const SizedBox(height: 16),
+          NeumorphicContainer(
+            borderRadius: 20,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.pin_rounded, color: primaryColor),
+                  title: const Text(
+                    'Bloqueo por PIN',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    userProvider.isAppLockEnabled ? 'Activado' : 'Desactivado',
+                  ),
+                  trailing: Switch(
+                    value: userProvider.isAppLockEnabled,
+                    onChanged: (value) async {
+                      if (value) {
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PinScreen(isSettingPin: true),
+                          ),
+                        );
+                        if (result != true) {
+                          // User cancelled PIN setting
+                        }
+                      } else {
+                        userProvider.setAppLockEnabled(false);
+                        userProvider.setBiometricEnabled(false);
+                      }
+                    },
+                    activeThumbColor: primaryColor,
+                  ),
+                ),
+                if (userProvider.isAppLockEnabled) ...[
+                  const Divider(indent: 50, endIndent: 20),
+                  FutureBuilder<List<bool>>(
+                    future: Future.wait([
+                      BiometricService.canAuthenticate(),
+                      BiometricService.hasEnrolledBiometrics(),
+                    ]),
+                    builder: (context, snapshot) {
+                      final results = snapshot.data ?? [false, false];
+                      final canBio = results[0];
+                      final enrolled = results[1];
+                      
+                      return ListTile(
+                        leading: Icon(
+                          Icons.fingerprint_rounded,
+                          color: (canBio && enrolled) ? primaryColor : Colors.grey,
+                        ),
+                        title: const Text(
+                          'Huella Digital / FaceID',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        enabled: canBio,
+                        subtitle: Text(
+                          !canBio
+                              ? 'Tu dispositivo no soporta biometría'
+                              : (!enrolled 
+                                  ? 'No tienes huellas registradas en tu teléfono' 
+                                  : (userProvider.isBiometricEnabled
+                                      ? 'Activado'
+                                      : 'Desactivado')),
+                        ),
+                        trailing: Switch(
+                          value: userProvider.isBiometricEnabled,
+                          onChanged: (canBio && enrolled)
+                              ? (value) => userProvider.setBiometricEnabled(value)
+                              : null,
+                          activeThumbColor: primaryColor,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ],
             ),
           ),

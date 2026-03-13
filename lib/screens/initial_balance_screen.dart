@@ -79,7 +79,7 @@ class _InitialBalanceScreenState extends State<InitialBalanceScreen> {
                   .fadeIn(),
               const SizedBox(height: 40),
               Text(
-                'Saldo inicial',
+                'Paso final: Saldo inicial',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
